@@ -12,5 +12,5 @@ for i in $@; do
   fi
 
   mkdir -p `dirname $dp`
-  cp $p $dp
+  cp -a $p $dp
 done
