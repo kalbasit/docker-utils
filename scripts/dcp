@@ -1,16 +1,17 @@
 #!/bin/sh
+set -e
 
-dest=$1
+dest="${1}"
 shift
 
-for i in $@; do
+for i in "$@"; do
   p="${i}"
   dp="${dest}/${p}"
-  if echo $i | grep -q ":"; then
-    p="`echo ${i} | cut -d: -f1`"
-    dp="${dest}/`echo $i | cut -d: -f2`"
+  if echo "$i" | grep -q ":"; then
+    p="$(echo "${i}" | cut -d: -f1)"
+    dp="${dest}/$(echo "${i}" | cut -d: -f2)"
   fi
 
-  mkdir -p `dirname $dp`
-  cp -a $p $dp
+  mkdir -p "$(dirname "$dp")"
+  cp -a "$p" "$dp"
 done
