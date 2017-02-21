@@ -1,4 +1,5 @@
 #!/bin/sh
+set -e
 
 if [ "$#" -ne 1 ]; then
   echo "Usage: $0 <dynamic>"
@@ -6,14 +7,21 @@ if [ "$#" -ne 1 ]; then
 fi
 
 dep() {
-  for i in `ldd $1 | sed -e 's:^\(.*\)* \(.*\) (.*)$:\2:g' -e 's:^\s*\(.*\) (.*)$:\1:g'`; do
-    if ! echo $i | grep -q '/'; then
+  # if the file is a symbolic link, print the path it points to and find the
+  # dependencies of it.
+  if [ -L "${1}" ]; then
+    readlink -f "${1}"
+    dep "$(readlink -f "${1}")"
+  fi
+  # print the direct dependency
+  for i in $(ldd "${1}" 2>/dev/null | sed -e 's:^\(.*\)* \(.*\) (.*)$:\2:g' -e 's:^\s*\(.*\) (.*)$:\1:g'); do
+    if ! echo "${i}" | grep -q '/'; then
       continue
     fi
 
-    echo $i
-    $0 $i
+    echo "${i}"
+    dep "${i}"
   done
 }
 
-dep $1 | sort | uniq
+dep "${1}" | sort | uniq
